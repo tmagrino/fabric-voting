@@ -24,3 +24,6 @@ hs_err_pid*
 
 # The config.properties file for a local install.
 config.properties
+
+# Compiler output
+classes/*
