@@ -1,0 +1,77 @@
+package voting.main;
+
+import java.util.Random;
+
+import fabric.common.Logging;
+import java.util.logging.Level;
+import common.util.Util;
+import voting.util.Election;
+import fabric.worker.Store;
+import fabric.worker.Worker;
+
+/**
+ * The main class for tallying votes in the system, to be run on a worker
+ * designated for tallying.
+ */
+public class Tally {
+
+  private static class Options {
+    public Election election;
+    public int avgTallyInterval;
+
+    public Options voting$main$Tally$Options$() {
+      fabric$lang$Object$();
+      return this;
+    }
+  }
+
+  public static void main(String[] args) {
+    Options opts = parseArgs(args);
+    if (opts == null) {
+      System.err.println("Error: No election found.");
+      return;
+    }
+
+    Random rand = new Random();
+    // Use the first district's store.
+    Store store = Worker.getWorker().getStore("district1");
+    while (true) {
+      long startTime = System.currentTimeMillis();
+      Logging.log(Logging.METRICS_LOGGER, Level.INFO, "STARTED QUERY FOR WINNER AT {0}ms", new Long(System.currentTimeMillis()).toString());
+      String winner = opts.election.winner(store, "a", "b");
+      Logging.log(Logging.METRICS_LOGGER, Level.INFO, "FINISHED QUERY FOR WINNER({0}) IN {1}ms", new java.lang.Object native[] { winner, new Long(System.currentTimeMillis() - startTime).toString() });
+      //System.out.println("Winner is " + winner);
+
+      Util.expSleep(rand, opts.avgTallyInterval - (System.currentTimeMillis() - startTime));
+    }
+  }
+
+  private static Options parseArgs(String[] args) {
+    if (args.length != 2) {
+      printUsage();
+      return null;
+    }
+
+    atomic {
+      int argIdx = 0;
+      Options result = new Options().voting$main$Tally$Options$();
+
+      Store store = Worker.getWorker().getStore(args[argIdx++]);
+      result.election = (Election) store.getRoot().get("election");
+      if (result.election == null) return null;
+
+      result.avgTallyInterval = Integer.parseInt(args[argIdx++]);
+
+      return result;
+    }
+  }
+
+  private static void printUsage() {
+    System.err.println("Usage: Tally ELECTION_STORE AVG_TALLY_INTERVAL");
+    System.err.println();
+    System.err.println("    ELECTION_STORE is the name of the store holding the election object");
+    System.err.println("    AVG_TALLY_INTERVAL is the average interval (in ms) at which the election");
+    System.err.println("      should be tallied");
+    System.err.println();
+  }
+}

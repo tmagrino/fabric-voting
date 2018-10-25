@@ -1,0 +1,45 @@
+package voting.util;
+
+public class Election {
+  private final District[] districts;
+
+  public Election voting$util$Election$(District[] districts) {
+    this.districts = districts;
+    fabric$lang$Object$();
+    return this;
+  }
+
+  /**
+   * @param districtNum a 1-based index
+   */
+  public District getDistrict(int districtNum) {
+    if (districtNum < 1 || districtNum > districts.length) return null;
+    return districts[districtNum-1];
+  }
+
+  public Tally tally(Store store) {
+    atomic {
+      Tally tally = new Tally@store().voting$util$Tally$();
+      for (int i = 0; i < districts.length; i++) {
+        districts[i].addToTally(tally);
+      }
+
+      return tally;
+    }
+  }
+
+  public String winner(Store store, String candidate1, String candidate2) {
+    String result = null;
+    //System.out.println("ATTEMPTING FRONT RUNNER QUERY");
+    atomic {
+      if (candidate1.compareTo(candidate2) > 0)
+        return winner(store, candidate1, candidate1);
+      int totalMargin = 0;
+      for (int i = 0; i < districts.length; i++) {
+        totalMargin = totalMargin + districts[i].margin(candidate1, candidate2);
+      }
+      result = (totalMargin >= 0) ? candidate1 : candidate2;
+    }
+    return result;
+  }
+}

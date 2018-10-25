@@ -1,0 +1,15 @@
+#!/bin/bash
+
+APP_HOME="$(dirname $0)/.."
+
+source "${APP_HOME}/../../config.sh"
+
+PATH="${FABRIC}/bin:${PATH}"
+
+CP="${APP_HOME}/classes"
+
+export FABRIC_HOME="${APP_HOME}"
+
+fab --jvm-cp "${CP}" --app-home "${FABRIC_HOME}" --name election \
+  voting.main.Tally election 100
+

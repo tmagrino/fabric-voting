@@ -1,0 +1,30 @@
+package voting.util;
+
+import fabric.util.HashMap;
+import fabric.util.Map;
+
+public class Tally {
+  /**
+   * Maps candidate names to their vote tallies.
+   */
+  private final Map tally;
+
+  public Tally voting$util$Tally$() {
+    fabric$lang$Object$();
+    tally = new HashMap().fabric$util$HashMap$();
+    return this;
+  }
+
+  public void add(String candidate, int votes) {
+    Integer curVotes = (Integer) tally.get(candidate);
+    if (curVotes == null) {
+      tally.put(candidate, new Integer(votes));
+    } else {
+      tally.put(candidate, new Integer(votes + curVotes.intValue()));
+    }
+  }
+
+  public String toString() {
+    return tally.toString();
+  }
+}

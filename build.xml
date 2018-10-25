@@ -1,0 +1,53 @@
+<project name="fabric-examples-voting" default="build-all" basedir=".">
+  <description>
+    Build Fabric voting example for metric treaties
+  </description>
+  <property environment="env" />
+  <property file="config.properties" />
+
+  <!--
+  ****************************************************************************
+    Global properties for this build.
+  ****************************************************************************
+  -->
+
+  <import file="${fabric.home}/common.xml" />
+  <import file="${fabric.home}/src/lib/sif/common.xml" />
+  <import file="${fabric.home}/src/lib/collections/common.xml" />
+
+  <dirname property="voting.home" file="${ant.file.voting}" />
+
+  <!--
+  ****************************************************************************
+    Targets for cleaning up the directory tree.
+  ****************************************************************************
+  -->
+
+  <target name="clean" description="Removes generated files">
+    <delete dir="${voting.home}/classes"/>
+  </target>
+
+  <target name="clobber" depends="clean"
+          description="Removes generated files and state of stores">
+    <delete dir="${voting.home}/var"/>
+  </target>
+
+  <!--
+  ****************************************************************************
+    Compilation targets.
+  ****************************************************************************
+  -->
+
+  <target name="build-all"
+          description="Builds the fabric baseline voting example">
+    <filc dest="${voting.home}/classes">
+      <arg value="-sourcepath" /> <arg value="${voting.home}/src" />
+      <arg value="-cp"/> <arg value="${voting.home}/classes"/>
+      <fileset dir="${voting.home}/src" includes="**/*.fil" />
+    </filc>
+  </target>
+</project>
+
+<!--
+vim: ts=2 sw=2 et ai
+-->

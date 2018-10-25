@@ -1,0 +1,35 @@
+#!/bin/bash
+
+BIN_DIR="$(dirname $0)"
+
+# Start the stores.
+"${BIN_DIR}/run-in-xterm" "Election store" \
+  "${BIN_DIR}/start-store election" &
+  #"${BIN_DIR}/start-store election |& tee election.txt" &
+for i in $(seq 1 $1); do
+	#if [[ $i -eq 1 ]]; then
+	#        "${BIN_DIR}/run-in-xterm" "District $i store" \
+	#          "${BIN_DIR}/start-store district$i --debug --suspend" &
+	#else
+		"${BIN_DIR}/run-in-xterm" "District $i store" \
+		  "${BIN_DIR}/start-store district$i" &
+		  #"${BIN_DIR}/start-store district$i |& tee store-$i.txt" &
+	#fi
+done
+
+# Wait for the stores to start up.
+echo "Press ENTER when the stores are ready."
+echo "You should see console prompts in each window, e.g., 'election>'"
+read -r
+
+# Start the workers.
+for i in $(seq 1 $1); do
+	#if [[ $i -eq 1 ]]; then
+	#        "${BIN_DIR}/run-in-xterm" "Voter $i worker" \
+	#          "${BIN_DIR}/start-worker worker$i --debug --suspend" &
+	#else
+		"${BIN_DIR}/run-in-xterm" "Voter $i worker" \
+		  "${BIN_DIR}/start-worker worker$i" &
+		  #"${BIN_DIR}/start-worker worker$i |& tee worker-$i.txt" &
+	#fi
+done

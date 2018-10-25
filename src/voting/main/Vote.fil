@@ -1,0 +1,172 @@
+package voting.main;
+
+import java.util.Random;
+
+import fabric.util.Arrays;
+import fabric.util.Iterator;
+import fabric.util.TreeMap;
+import fabric.util.Map;
+import fabric.common.Logging;
+import java.util.logging.Level;
+import fabric.worker.remote.RemoteWorker;
+import fabric.worker.Worker;
+import fabric.worker.Store;
+
+import common.util.Util;
+import voting.util.District;
+import voting.util.Election;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+
+/**
+ * The main class for adding votes to the system, to be run on a set of workers,
+ * each associated with a voting district.
+ */
+public class Vote {
+
+  private static class VoteDistribution {
+    private final double startBias;
+    private final double endBias;
+
+    private final long startShift;
+    private final long endShift;
+    private transient final Random rand;
+
+    public VoteDistribution voting$main$Vote$VoteDistribution$(double startBias, double endBias, long startShift, long endShift) {
+      this.startBias = startBias;
+      this.endBias = endBias;
+      long startTime = System.currentTimeMillis();
+      this.startShift = startShift + startTime;
+      this.endShift = endShift + startTime;
+      this.rand = new Random();
+      fabric$lang$Object$();
+      return this;
+    }
+
+    public String nextVote() {
+      double cutOff = startBias;
+      long curTime = System.currentTimeMillis();
+      if (curTime < endShift && curTime > startShift) {
+        long totalShift = endShift - startShift;
+        long curShift = curTime - startShift;
+        double percentShift = ((double) curShift) / totalShift;
+        double shiftMag = endBias - startBias;
+        cutOff = startBias + (percentShift * shiftMag);
+      } else if (curTime > endShift) {
+        cutOff = endBias;
+      }
+      return rand.nextDouble() < cutOff ? "a" : "b";
+    }
+  }
+
+  private static class Options {
+    public District district;
+    public int avgVoteInterval;
+    public int districtNum;
+    public int numThreads;
+
+    /**
+     * Maps cumulative voting probabilities to candidates.
+     */
+    public VoteDistribution distribution;
+
+    public Options voting$main$Vote$Options$() {
+      fabric$lang$Object$();
+      return this;
+    }
+  }
+
+  public static void main(String[] args) {
+    final Options opts = parseArgs(args);
+    if (opts == null) {
+      return;
+    }
+
+    final Random rand = new Random();
+    final RemoteWorker districtWorker = Worker.getWorker().getWorker("district" + opts.districtNum);
+    final ExecutorService service = opts.numThreads > 0
+      ? Executors.newFixedThreadPool(opts.numThreads)
+      : Executors.newCachedThreadPool();
+    int a = 0;
+    int a_copy = 0;
+    int b = 0;
+    int b_copy = 0;
+    while (true) {
+      long startTime = System.currentTimeMillis();
+
+      Runnable r = null;
+      atomic {
+        final String candidate = opts.distribution.nextVote();
+        final long voteStartTime = System.currentTimeMillis();
+        Logging.log(Logging.METRICS_LOGGER, Level.INFO, "STARTED VOTE FOR {0}", new java.lang.Object native[] { candidate });
+        r = ((Runnable) (new Runnable() {
+          public void run() {
+            opts.district.vote(candidate);
+            Logging.log(Logging.METRICS_LOGGER, Level.INFO, "FINISHED VOTE FOR {0} IN {1}ms", new java.lang.Object native[] { candidate, new Long(System.currentTimeMillis() - voteStartTime).toString() });
+          }
+        }).fabric$lang$Object$());
+      }
+      service.submit(r);
+
+      // Wait until the next vote event.
+      Util.expSleep(rand, opts.avgVoteInterval - (System.currentTimeMillis() - startTime));
+    }
+  }
+
+  private static Options parseArgs(String[] args) {
+    if (args.length != 8) {
+      printUsage();
+      System.err.println("Args given: " + Arrays.toString(args));
+      return null;
+    }
+
+    Options result = null;
+    atomic {
+      result = new Options().voting$main$Vote$Options$();
+
+      int argIdx = 0;
+      Store store = Worker.getWorker().getStore(args[argIdx++]);
+      result.districtNum = Integer.parseInt(args[argIdx++]);
+
+      Election election = (Election) store.getRoot().get("election");
+      if (election == null) {
+        System.err.println("Error: No district found.");
+        return null;
+      }
+
+      result.district = election.getDistrict(result.districtNum);
+      result.numThreads = Integer.parseInt(args[argIdx++]);
+      result.avgVoteInterval = Integer.parseInt(args[argIdx++]);
+
+      double startBias = Double.parseDouble(args[argIdx++]);
+      double endBias = Double.parseDouble(args[argIdx++]);
+      long startTime = Long.parseLong(args[argIdx++]);
+      long endTime = Long.parseLong(args[argIdx++]);
+      result.distribution = new VoteDistribution().voting$main$Vote$VoteDistribution$(startBias, endBias, startTime, endTime);
+    }
+    return result;
+  }
+
+  private static void printUsage() {
+    System.err.println("Usage:");
+    System.err.println("  Vote ELECTION_STORE DISTRICT_NUM NUM_THREADS AVG_VOTE_INTERVAL \\");
+    System.err.println("       START_CUMUL_VOTE_PROB END_CUMUL_VOTE_PROB START_SHIFT END_SHIFT");
+    System.err.println();
+    System.err.println("    ELECTION_STORE is the name of the store holding the election object");
+    System.err.println("    DISTRICT_NUM is the identifier number for the voting district");
+    System.err.println("      in which to cast votes");
+    System.err.println("    NUM_THREADS is the number of concurrent vote operations that are");
+    System.err.println("      running at any given time (0 indicates unbounded)");
+    System.err.println("    AVG_VOTE_INTERVAL is the average interval (in ms) at which votes");
+    System.err.println("      should be cast");
+    System.err.println("    START_CUMUL_VOTE_PROB is the probability with which votes will be");
+    System.err.println("      cast for candidate a (as opposed to b) to start.");
+    System.err.println("    END_CUMUL_VOTE_PROB is the probability with which votes will be");
+    System.err.println("      cast for candidate a (as opposed to b) at the end.");
+    System.err.println("    START_SHIFT is the amount of time (in ms) into the run to start");
+    System.err.println("      moving from the start proability to the end probability.");
+    System.err.println("    END_SHIFT is the amount of time (in ms) into the run to finish");
+    System.err.println("      moving from the start proability to the end probability.");
+    System.err.println();
+  }
+}

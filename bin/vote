@@ -1,0 +1,21 @@
+#!/bin/bash
+
+APP_HOME="$(dirname $0)/.."
+
+source "${APP_HOME}/../../config.sh"
+
+PATH="${FABRIC}/bin:${PATH}"
+
+CP="${APP_HOME}/classes"
+
+export FABRIC_HOME="${APP_HOME}"
+
+fab --jvm-cp "${CP}" --app-home "${FABRIC_HOME}" --name worker$1 \
+  voting.main.Vote election $1 0 0 $2 $3 $4 $5
+  #                         worker num
+  #                            num threads
+  #                              avg interval
+  #                                starting bias
+  #                                   ending bias
+  #                                     start time for bias shift
+  #                                       end time for bias shift

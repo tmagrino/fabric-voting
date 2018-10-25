@@ -1,0 +1,38 @@
+package common.util;
+
+import java.util.Random;
+
+public class Util {
+  public static void expSleep(Random rand, long avgDurationMillis) {
+    final double factor = -Math.log(rand.nextDouble());
+
+    final long delayMillis;
+    if (factor > 10) {
+      // Clip at 10 times the mean value.
+      delayMillis = 10 * avgDurationMillis;
+    } else {
+      delayMillis = (int) (factor * avgDurationMillis);
+    }
+
+    sleep(delayMillis);
+  }
+
+  /**
+   * @param durationMillis
+   *          amount of time to sleep, in milliseconds.
+   */
+  public static void sleep(long durationMillis) {
+    long wakeTimeMillis = System.currentTimeMillis() + durationMillis;
+    while (true) {
+      if (durationMillis < 0) return;
+      try {
+        Thread.sleep(durationMillis);
+        return;
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+
+      durationMillis = wakeTimeMillis - System.currentTimeMillis();
+    }
+  }
+}

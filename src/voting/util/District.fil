@@ -1,0 +1,72 @@
+package voting.util;
+
+import fabric.util.HashMap;
+import fabric.util.Iterator;
+import fabric.util.Map;
+import fabric.worker.Store;
+import fabric.common.Logging;
+import java.util.logging.Level;
+import fabric.worker.transaction.TransactionManager;
+
+public class District {
+
+  /**
+   * Maps candidates (Strings) to Votes.
+   */
+  private final Map votes;
+
+  public District voting$util$District$() {
+    fabric$lang$Object$();
+    this.votes = new HashMap().fabric$util$HashMap$();
+    this.votes.put("a", new Votes().voting$util$Votes$());
+    this.votes.put("b", new Votes().voting$util$Votes$());
+    return this;
+  }
+
+  public int vote_remote(fabric.lang.security.Principal callPrincipal, String candidate) {
+    //final Store s = $getStore();
+    //System.out.println("Attempting to vote... store " + s);
+    int result = vote(candidate);
+    return result;
+  }
+
+  public int vote(String candidate) {
+    return vote_static(this, candidate);
+  }
+
+  private static int vote_static(District tmp, String candidate) {
+    atomic {
+      final Store s = tmp.$getStore();
+      Votes votes = (Votes) tmp.votes.get(candidate);
+      if (votes == null) {
+        votes = new Votes@s().voting$util$Votes$();
+        tmp.votes.put(candidate, votes);
+      }
+
+      votes.increment();
+      return votes.get();
+    }
+  }
+
+  public void addToTally(Tally tally) {
+    for (Iterator it = votes.entrySet().iterator(); it.hasNext(); ) {
+      Map.Entry entry = (Map.Entry) it.next();
+      tally.add((String) entry.getKey(), ((Votes) entry.getValue()).get());
+    }
+  }
+
+  public int margin(String candidate1, String candidate2) {
+    final Store s = $getStore();
+    Votes votes1 = (Votes) this.votes.get(candidate1);
+    if (votes1 == null) {
+      votes1 = new Votes@s().voting$util$Votes$();
+      this.votes.put(candidate1, votes1);
+    }
+    Votes votes2 = (Votes) this.votes.get(candidate2);
+    if (votes2 == null) {
+      votes2 = new Votes@s().voting$util$Votes$();
+      this.votes.put(candidate2, votes2);
+    }
+    return votes1.get() - votes2.get();
+  }
+}

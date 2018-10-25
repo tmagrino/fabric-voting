@@ -1,0 +1,33 @@
+package voting.main;
+
+import voting.util.District;
+import voting.util.Election;
+
+/**
+ * Main class for initializing the voting example.
+ */
+public class CreateDB {
+  public static void main(String[] args) {
+    if (args.length < 2) {
+      System.err.println("Usage: CreateDB ELECTION_STORE DISTRICT_STORES...");
+      System.err.println();
+      return;
+    }
+
+    Store electionStore = Worker.getWorker().getStore(args[0]);
+
+    atomic {
+      int numDistricts = args.length - 1;
+      District[] districts = new District[numDistricts]@electionStore;
+      for (int i = 0; i < numDistricts; i++) {
+        Store districtStore = Worker.getWorker().getStore(args[i+1]);
+        districts[i] =
+            new District@districtStore().voting$util$District$();
+      }
+
+      Election election =
+          new Election@electionStore().voting$util$Election$(districts);
+      electionStore.getRoot().put("election", election);
+    }
+  }
+}

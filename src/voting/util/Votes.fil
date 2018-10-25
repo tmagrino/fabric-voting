@@ -1,0 +1,22 @@
+package voting.util;
+
+/**
+ * Counts the number of votes for a single candidate at a voting district.
+ */
+public class Votes {
+  private int count;
+
+  public Votes voting$util$Votes$() {
+    fabric$lang$Object$();
+    this.count = 0;
+    return this;
+  }
+
+  public void increment() {
+    count++;
+  }
+
+  public int get() {
+    return count;
+  }
+}
