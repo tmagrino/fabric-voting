@@ -2,7 +2,7 @@
 
 APP_HOME="$(dirname $0)/.."
 
-source "${APP_HOME}/../../config.sh"
+source "${APP_HOME}/config.sh"
 
 PATH="${FABRIC}/bin:${PATH}"
 
