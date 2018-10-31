@@ -149,6 +149,22 @@ Replacing the "`$`" variable(s) with the appropriate values:
 (Note: The first argument `election` can be replaced with the name of whatever
 node you set as the election store instead of the store named `election`).
 
+#### Output
+
+The FabIL code for this benchmark outputs simple log messages for the start and
+end of each vote and tally operation.  These will be emitted to the log files
+created in `$REPO/var/log/`.  The log messages have the form `LEVEL(TIME):
+MESSAGE` where `LEVEL` is the [Java logging
+level](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Level.html),
+`TIME` is the [epoch time](https://en.wikipedia.org/wiki/Unix_time) in
+milliseconds, and `MESSAGE` is the message passed by the program to the logging
+API.
+
+The logging behavior is configured by the settings in
+`$REPO/etc/logging.properties` which indicates what level of messages to include
+for each [Java
+Logger](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Logger.html).
+
 # Some TODOs:
 
 Some notes for things to clean up and further document:
@@ -157,4 +173,3 @@ Some notes for things to clean up and further document:
     tally clients in `bin/vote` and `bin/tally`.
   * Discussion of how to test different forms of contention.
   * Documentation of adding synthetic network delay using Fabric node settings.
-  * Discuss log files.
