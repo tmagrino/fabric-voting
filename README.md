@@ -17,15 +17,11 @@ have [Fabric](https://github.com/apl-cornell/fabric/) built.  Note that
 After setting the configuration, you can build by running `ant` with either the
 default target:
 
-    ```
     $ ant
-    ```
 
 Or with the `build-all` target:
 
-    ```
     $ ant build-all
-    ```
 
 Finally, this repository provides credentials and fabric settings in
 `$REPO/etc/` for:
@@ -57,28 +53,22 @@ should be started in a separate terminal session.
 
 There is always one election store:
 
-    ```
     $ bin/start-store election
-    ```
 
 And one or more district stores (consecutively numbered starting from 1):
 
-    ```
     $ bin/start-store district1
     $ bin/start-store district2
     ...
     $ bin/start-store district9
     ...
-    ```
 
 At this point, you can initialize the database, which ensures that the election
 store has references to the different districts in the election as well as each
 district's vote counts.  To do this, run the following, replacing $n with the
 number of districts you'll be using:
 
-    ```
     $ bin/init-voting-state $n
-    ```
 
 At this point you're ready to run vote and tally clients!
 
@@ -89,22 +79,18 @@ the election and district stores or create additional worker nodes (different
 from stores because they do not persist state).  Like the stores, workers should
 be started in separate terminal sessions:
 
-    ```
     $ bin/start-worker worker1
     $ bin/start-worker worker2
     ...
     $ bin/start-worker worker9
     ...
-    ```
 
 #### Running Vote Clients
 
 You can run a voting client with the following command on the shell of a worker
 (or store):
 
-    ```
     > voting.main.Vote election $district_num $max_threads $avg_vote_interval $start_bias $end_bias $shift_start_delay $shift_end_delay
-    ```
 
 Replacing the "`$`" variable(s) with the appropriate values:
   * `$district_num`: the number of the district to cast votes at.
@@ -138,9 +124,7 @@ node you set as the election store instead of the store named `election`)
 You can run a tallying client with the following command on the shell of a worker
 (or store):
 
-    ```
     > voting.main.Tally election $avg_tally_interval
-    ```
 
 Replacing the "`$`" variable(s) with the appropriate values:
   * `$avg_tally_interval`: The  time in milliseconds between tally operations.
