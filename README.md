@@ -28,11 +28,12 @@ Finally, this repository provides credentials and fabric settings in
   * 1 election store called "election",
   * 16 district stores "district1" through "district16", and
   * 16 additional workers "worker1" through "worker16".
+
 If you need _additional_ workers and stores, you can create credentials following the
 instructions in the Fabric manual
 (discussed in [master branch
 README doc](https://github.com/apl-cornell/fabric/blob/master/doc/manual/src/runtime.mkdn)
-or [the published 0.3.0 release
+and [the published 0.3.0 release
 manual](http://www.cs.cornell.edu/projects/fabric/manual/0.3.0/html/node-config.html)).
 We suggest copying the properties from an existing worker or store (eg.
 `$REPO/etc/config/district1.properties`).
@@ -92,7 +93,7 @@ You can run a voting client with the following command on the shell of a worker
 
     > voting.main.Vote election $district_num $max_threads $avg_vote_interval $start_bias $end_bias $shift_start_delay $shift_end_delay
 
-Replacing the "`$`" variable(s) with the appropriate values:
+Replacing the "`$`" variable(s) with the appropriate value(s):
   * `$district_num`: the number of the district to cast votes at.
   * `$max_threads`: the number of concurrent vote operations that can be active.
     If 0 is used, this indicates there should be no limit on the number of
@@ -126,7 +127,7 @@ You can run a tallying client with the following command on the shell of a worke
 
     > voting.main.Tally election $avg_tally_interval
 
-Replacing the "`$`" variable(s) with the appropriate values:
+Replacing the "`$`" variable(s) with the appropriate value(s):
   * `$avg_tally_interval`: The  time in milliseconds between tally operations.
     If 0 is used, this indicates tally operations should be run as quickly as
     possible (_not_ recommended).
