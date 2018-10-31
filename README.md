@@ -1,5 +1,6 @@
 # fabric-voting
-A simple voting benchmark for Fabric.
+A simple voting benchmark for Fabric.  Multiple districts record local vote
+counts for either candidate "a" or candidate "b".
 
 ## Setup
 
