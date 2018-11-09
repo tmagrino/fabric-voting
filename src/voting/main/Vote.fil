@@ -7,6 +7,7 @@ import fabric.util.Iterator;
 import fabric.util.TreeMap;
 import fabric.util.Map;
 import fabric.common.Logging;
+import java.util.logging.Logger;
 import java.util.logging.Level;
 import fabric.worker.remote.RemoteWorker;
 import fabric.worker.Worker;
