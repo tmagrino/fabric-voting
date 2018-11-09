@@ -24,6 +24,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class Vote {
 
+  private static final Logger VOTE_LOGGER = Logger.getLogger("vote");
+
   private static class VoteDistribution {
     private final double startBias;
     private final double endBias;
@@ -98,11 +100,11 @@ public class Vote {
       atomic {
         final String candidate = opts.distribution.nextVote();
         final long voteStartTime = System.currentTimeMillis();
-        Logging.log(Logging.METRICS_LOGGER, Level.INFO, "STARTED VOTE FOR {0}", new java.lang.Object native[] { candidate });
+        Logging.log(VOTE_LOGGER, Level.INFO, "STARTED VOTE FOR {0}", new java.lang.Object native[] { candidate });
         r = ((Runnable) (new Runnable() {
           public void run() {
             opts.district.vote(candidate);
-            Logging.log(Logging.METRICS_LOGGER, Level.INFO, "FINISHED VOTE FOR {0} IN {1}ms", new java.lang.Object native[] { candidate, new Long(System.currentTimeMillis() - voteStartTime).toString() });
+            Logging.log(VOTE_LOGGER, Level.INFO, "FINISHED VOTE FOR {0} IN {1}ms", new java.lang.Object native[] { candidate, new Long(System.currentTimeMillis() - voteStartTime).toString() });
           }
         }).fabric$lang$Object$());
       }
